@@ -83,7 +83,13 @@ class SPMFile:
         image_sections = header['Ciao image list']
         for i, image_header in enumerate(image_sections):
             image = CIAOImage(bytestring, header, image_number=i)
-            key = image_header['2:Image Data'].external_designation
+            try:
+                key = image_header['2:Image Data'].external_designation
+                print(key)
+            except KeyError:
+                key = image_header['3:Image Data'].external_designation
+                print(key)
+
             images[key] = image
 
         return images
@@ -107,7 +113,10 @@ class CIAOImage:
         self._raw_image = self.raw_image_from_bytes(file_bytes)
 
         # Some handy attributes are defined below for ease of use
-        self.title = self.image_header['2:Image Data'].external_designation
+        try:
+            self.title = self.image_header['2:Image Data'].external_designation
+        except KeyError:
+            self.title = self.image_header['3:Image Data'].external_designation
         self.scan_size = self.file_header['Ciao scan list']['Scan Size']
 
         # Calculate relevant physical quantities for dimension
